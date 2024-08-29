@@ -1,5 +1,5 @@
 import cv2
-from threading import Thread
+from threading import Thread, Lock
 import os
 import numpy as np
 
@@ -22,7 +22,12 @@ class FieldRecorder:
         self.out_close = cv2.VideoWriter(self.path+'/close.mp4', cv2.VideoWriter_fourcc('a', 'v', 'c', '1'), 10, (1280, 720))
         self.out_robot = cv2.VideoWriter(self.path+'/robot.mp4', cv2.VideoWriter_fourcc('a', 'v', 'c', '1'), 10, (1280, 720))
         self.thread = Thread(target=self.record, args=())
+        self.write_thread = Thread(target=self.write, args=())
+        self.lock = Lock()
+        self.frames_bird = []
+        self.frames_close = []
         self.thread.start()
+        self.write_thread.start()
     
 
     def record(self):
@@ -34,6 +39,32 @@ class FieldRecorder:
             frame_close = cv2.resize(frame_close, (1280, 720))
             self.out_close.write(frame_close)
             self.out_robot.write(self.robot_frame)
+    def write(self):
+        while self.recording or len(self.frames_bird) > 0:
+            self.lock.acquire()
+            print(len(self.frames_bird))
+            if len(self.frames_bird) > 0:
+                frame_bird = self.frames_bird.pop(0)
+                frame_close = self.frames_close.pop(0)
+                self.lock.release()
+                frame_bird = cv2.resize(frame_bird, (1280, 720))
+                self.out_bird.write(frame_bird)
+                frame_close = cv2.resize(frame_close, (1280, 720))
+                self.out_close.write(frame_close)
+                self.out_robot.write(self.robot_frame)
+            else:
+                self.lock.release()
+        # frame_bird = cv2.resize(frame_bird, (1280, 720))
+        # self.out_bird.write(frame_bird)
+        # frame_close = cv2.resize(frame_close, (1280, 720))
+        # self.out_close.write(frame_close)
+        # self.out_robot.write(self.robot_frame)
+    def add_frames(self, frame_bird, frame_close):
+        self.lock.acquire()
+        self.frames_bird.append(frame_bird)
+        self.frames_close.append(frame_close)
+        self.lock.release()
+
     def add_robot_frame(self, image):
         self.robot_frame = cv2.resize(decode_base64_image(image), (1280, 720))
             
