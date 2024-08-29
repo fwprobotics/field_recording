@@ -7,7 +7,7 @@ class FieldRecorder:
     def __init__(self, path):
         self.path = path
         self.recording = False
-        self.robot_frame = np.zeros((720,1280,3), np.uint8)
+        self.robot_frame = np.zeros((360,480,3), np.uint8)
         
 
     def start_recording(self):
@@ -18,9 +18,9 @@ class FieldRecorder:
         self.cap_bird.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         self.cap_close.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         self.cap_close.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-        self.out_bird = cv2.VideoWriter(self.path+'/bird.mp4', cv2.VideoWriter_fourcc('a', 'v', 'c', '1'), 10, (1280, 720))
-        self.out_close = cv2.VideoWriter(self.path+'/close.mp4', cv2.VideoWriter_fourcc('a', 'v', 'c', '1'), 10, (1280, 720))
-        self.out_robot = cv2.VideoWriter(self.path+'/robot.mp4', cv2.VideoWriter_fourcc('a', 'v', 'c', '1'), 10, (1280, 720))
+        self.out_bird = cv2.VideoWriter(self.path+'/bird.mp4', cv2.VideoWriter_fourcc('a', 'v', 'c', '1'), 10, (480, 360))
+        self.out_close = cv2.VideoWriter(self.path+'/close.mp4', cv2.VideoWriter_fourcc('a', 'v', 'c', '1'), 10, (480, 360))
+        self.out_robot = cv2.VideoWriter(self.path+'/robot.mp4', cv2.VideoWriter_fourcc('a', 'v', 'c', '1'), 10, (480, 360))
         self.thread = Thread(target=self.record, args=())
         self.write_thread = Thread(target=self.write, args=())
         self.lock = Lock()
@@ -48,9 +48,9 @@ class FieldRecorder:
                 frame_bird = self.frames_bird.pop(0)
                 frame_close = self.frames_close.pop(0)
                 self.lock.release()
-                frame_bird = cv2.resize(frame_bird, (1280, 720))
+                frame_bird = cv2.resize(frame_bird, (480, 360))
                 self.out_bird.write(frame_bird)
-                frame_close = cv2.resize(frame_close, (1280, 720))
+                frame_close = cv2.resize(frame_close, (480, 360))
                 self.out_close.write(frame_close)
                 self.out_robot.write(self.robot_frame)
             else:
@@ -67,7 +67,7 @@ class FieldRecorder:
         self.lock.release()
 
     def add_robot_frame(self, image):
-        self.robot_frame = cv2.resize(decode_base64_image(image), (1280, 720))
+        self.robot_frame = cv2.resize(decode_base64_image(image), (480, 360))
             
     def stop_recording(self):
         
