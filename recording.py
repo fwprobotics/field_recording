@@ -70,9 +70,10 @@ class FieldRecorder:
         self.robot_frame = cv2.resize(decode_base64_image(image), (1280, 720))
             
     def stop_recording(self):
+        
+        self.recording = False
         while len(self.frames_bird) > 0:
             pass
-        self.recording = False
         self.thread.join()
         self.thread = None
         self.cap_bird.release()
