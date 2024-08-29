@@ -33,12 +33,13 @@ class FieldRecorder:
     def record(self):
         while self.recording:
             ret, frame_bird = self.cap_bird.read()
-            frame_bird = cv2.resize(frame_bird, (1280, 720))
-            self.out_bird.write(frame_bird)
+        #    frame_bird = cv2.resize(frame_bird, (1280, 720))
+         #   self.out_bird.write(frame_bird)
             ret, frame_close = self.cap_close.read()
-            frame_close = cv2.resize(frame_close, (1280, 720))
-            self.out_close.write(frame_close)
-            self.out_robot.write(self.robot_frame)
+         #   frame_close = cv2.resize(frame_close, (1280, 720))
+         #   self.out_close.write(frame_close)
+          #  self.out_robot.write(self.robot_frame)
+            self.add_frames(frame_bird, frame_close)
     def write(self):
         while self.recording or len(self.frames_bird) > 0:
             self.lock.acquire()
